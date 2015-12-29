@@ -20,15 +20,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import gtk
-import pango
+from gi.repository import Gtk
+from gi.repository import Pango
 import os
 import commands
+import platform
 
-from sugar.activity import activity
-from sugar.graphics.toolbarbox import ToolbarBox
-from sugar.activity.widgets import ActivityToolbarButton
-from sugar.activity.widgets import StopButton
+from sugar3.activity import activity
+from sugar3.graphics.toolbarbox import ToolbarBox
+from sugar3.activity.widgets import ActivityButton
+from sugar3.activity.widgets import TitleEntry
+from sugar3.activity.widgets import StopButton
 
 from gettext import gettext as _
 
@@ -40,7 +42,13 @@ class JreActivity(activity.Activity):
         self.max_participants = 1
 
         self.folder_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
-        self.jre_folder = os.path.join(self.folder_path, "jre")
+        if platform.machine().startswith('arm'):
+            self.jre_folder = os.path.join(self.folder_path, "jre_arm")
+        else:
+            if platform.architecture()[0] == '64bit':
+                self.jre_folder = os.path.join(self.folder_path, "jre_64")
+            else:
+                self.jre_folder = os.path.join(self.folder_path, "jre_32")
         self.ceibaljam_icon_path = os.path.join(self.folder_path, "images/ceibaljam.png")
 
         self.build_toolbar()
@@ -51,11 +59,11 @@ class JreActivity(activity.Activity):
 
         toolbox = ToolbarBox()
 
-        activity_button = ActivityToolbarButton(self)
+        activity_button = ActivityButton(self)
         toolbox.toolbar.insert(activity_button, -1)
         activity_button.show()
 
-        separator = gtk.SeparatorToolItem()
+        separator = Gtk.SeparatorToolItem()
         separator.props.draw = False
         separator.set_expand(True)
         toolbox.toolbar.insert(separator, -1)
@@ -65,80 +73,80 @@ class JreActivity(activity.Activity):
         toolbox.toolbar.insert(stop_button, -1)
         stop_button.show()
 
-        self.set_toolbox(toolbox)
+        self.set_toolbar_box(toolbox)
 
     def build_canvas(self):
 
-        box_canvas = gtk.VBox(False, 0)
+        box_canvas = Gtk.VBox(False, 0)
 
         # Title
 
-        box_title = gtk.VBox(False, 0)
-        label_title = gtk.Label(_("Java Runtime Environment"))
-        label_title.set_justify(gtk.JUSTIFY_CENTER)
-        label_title.modify_font(pango.FontDescription("Arial 18"))
-        label_copyright1 = gtk.Label(_("Copyright © 2010 Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,"))
-        label_copyright2 = gtk.Label(_("California 95054, U.S.A.  All rights reserved."))
-        label_copyright1.set_justify(gtk.JUSTIFY_CENTER)
-        label_copyright2.set_justify(gtk.JUSTIFY_CENTER)
+        box_title = Gtk.VBox(False, 0)
+        label_title = Gtk.Label(_("Java Runtime Environment"))
+        label_title.set_justify(Gtk.Justification.CENTER)
+        label_title.modify_font(Pango.FontDescription("Arial 18"))
+        label_copyright1 = Gtk.Label(_("Copyright © 2010 Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,"))
+        label_copyright2 = Gtk.Label(_("California 95054, U.S.A.  All rights reserved."))
+        label_copyright1.set_justify(Gtk.Justification.CENTER)
+        label_copyright2.set_justify(Gtk.Justification.CENTER)
 
-        box_title.add(gtk.Label(""))
-        box_title.add(gtk.Label(""))
+        box_title.add(Gtk.Label(""))
+        box_title.add(Gtk.Label(""))
         box_title.add(label_title)
-        box_title.add(gtk.Label(""))
-        box_title.add(gtk.Label(""))
+        box_title.add(Gtk.Label(""))
+        box_title.add(Gtk.Label(""))
         box_title.add(label_copyright1)
         box_title.add(label_copyright2)
-        box_title.add(gtk.Label(""))
+        box_title.add(Gtk.Label(""))
 
         # Version
 
-        box_version = gtk.VBox(False, 0)
+        box_version = Gtk.VBox(False, 0)
         version_information = commands.getoutput(self.jre_folder + "/bin/java -version")
-        label_version_info = gtk.Label(version_information)
-        label_version_info.set_justify(gtk.JUSTIFY_CENTER)
+        label_version_info = Gtk.Label(version_information)
+        label_version_info.set_justify(Gtk.Justification.CENTER)
 
-        box_version.add(gtk.Label(""))
+        box_version.add(Gtk.Label(""))
         box_version.add(label_version_info)
-        box_version.add(gtk.Label(""))
+        box_version.add(Gtk.Label(""))
 
         # Usage explanation
 
-        box_usage = gtk.VBox(False, 0)
-        label_usage1 = gtk.Label(_("To use this JRE in your activity, add the following line to your script:"))
-        label_usage2 = gtk.Label('<b>PATH=' + self.jre_folder + '/bin:$PATH</b>')
+        box_usage = Gtk.VBox(False, 0)
+        label_usage1 = Gtk.Label(_("To use this JRE in your activity, add the following line to your script:"))
+        label_usage2 = Gtk.Label('<b>PATH=' + self.jre_folder + '/bin:$PATH</b>')
         label_usage2.set_use_markup(True)
-        label_usage1.set_justify(gtk.JUSTIFY_CENTER)
-        label_usage2.set_justify(gtk.JUSTIFY_CENTER)
-        box_usage.add(gtk.Label(""))
+        label_usage1.set_justify(Gtk.Justification.CENTER)
+        label_usage2.set_justify(Gtk.Justification.CENTER)
+        box_usage.add(Gtk.Label(""))
         box_usage.add(label_usage1)
         box_usage.add(label_usage2)
-        box_usage.add(gtk.Label(""))
+        box_usage.add(Gtk.Label(""))
 
         # Credits
 
-        box_credits = gtk.VBox(False, 0)
-        box_credits.add(gtk.Label(""))
-        box_credits.add(gtk.Label(_('Sugarized by %(THE_AUTHOR)s') % { 'THE_AUTHOR': 'Marcos Orfila' }))
-        label_my_website = gtk.Label('<b>http://www.marcosorfila.com</b>')
+        box_credits = Gtk.VBox(False, 0)
+        box_credits.add(Gtk.Label(""))
+        box_credits.add(Gtk.Label(_('Sugarized by %(THE_AUTHOR)s') % { 'THE_AUTHOR': 'Marcos Orfila' }))
+        label_my_website = Gtk.Label('<b>http://www.marcosorfila.com</b>')
         label_my_website.set_use_markup(True)
         box_credits.add(label_my_website)
-        box_credits.add(gtk.Label(""))
+        box_credits.add(Gtk.Label(""))
 
         # Footer box (Activities on CeibalJAM! website)
 
-        box_footer = gtk.VBox(False, 0)
-        box_footer.add(gtk.Label(""))
-        box_footer.add(gtk.Label(_('Find more activities on %(CEIBALJAM)s website:') % { 'CEIBALJAM': 'CeibalJAM!'}))
-        label_ceibaljam_website = gtk.Label('<b>http://activities.ceibaljam.org</b>')
+        box_footer = Gtk.VBox(False, 0)
+        box_footer.add(Gtk.Label(""))
+        box_footer.add(Gtk.Label(_('Find more activities on %(CEIBALJAM)s website:') % { 'CEIBALJAM': 'CeibalJAM!'}))
+        label_ceibaljam_website = Gtk.Label('<b>http://activities.ceibaljam.org</b>')
         label_ceibaljam_website.set_use_markup(True)
         box_footer.add(label_ceibaljam_website)
-        box_footer.add(gtk.Label(""))
+        box_footer.add(Gtk.Label(""))
 
         # CeibalJAM! image
 
-        box_ceibaljam_image = gtk.VBox(False, 0)
-        image_ceibaljam = gtk.Image()
+        box_ceibaljam_image = Gtk.VBox(False, 0)
+        image_ceibaljam = Gtk.Image()
         image_ceibaljam.set_from_file(self.ceibaljam_icon_path)
         box_ceibaljam_image.pack_end(image_ceibaljam, False, False, 0)
 
